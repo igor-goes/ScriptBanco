@@ -1,0 +1,108 @@
+create database monitor;
+use monitor;
+-- drop database monitor;
+# criação das tabelas
+create table funcionario (
+	idFuncionario int primary key auto_increment,
+    nome varchar(45) not null,
+    email varchar(45) not null,
+    senha varchar(20) not null,
+    fkGerente int,
+    foreign key(fkGerente) references funcionario(idFuncionario)
+)auto_increment = 1000;
+
+create table maquina (
+	idMaquina int primary key auto_increment
+);
+
+create table funcionarioHasMaquina (
+	fkFuncionario int,
+    fkMaquina int,
+    primary key(fkFuncionario, fkMaquina)
+);
+
+create table componente (
+	idComponente int primary key auto_increment,
+    nome varchar(45) not null,
+    metrica varchar(10) not null,
+    ferramenta varchar(6) not null
+)auto_increment = 100;
+
+create table configuracao (
+	idConfiguracao int primary key auto_increment,
+    fkMaquina int not null,
+    foreign key(fkMaquina) references maquina(idMaquina),
+    fkComponente int not null,
+    foreign key(fkComponente) references componente(idComponente),
+    limite int not null
+)auto_increment = 1000;
+
+create table dado (
+	idDado int primary key auto_increment,
+    fkConfiguracao int not null,
+    foreign key(fkConfiguracao) references configuracao(idConfiguracao),
+    momentoLeitura datetime not null
+);
+
+create table dadoPorNucleo (
+	fkDado int not null,
+    idDadoPorNucleo int not null,
+    foreign key(fkDado) references dado(idDado),
+    primary key(fkDado, idDadoPorNucleo),
+    valor int not null
+);
+
+create table dataset (
+	idMaquina int,
+    cpuCore1 int,
+    cpuCore2 int,
+    temperaturaCore1 int,
+    temperaturaCore2 int,
+    memoria int,
+    disco int,
+    errosRecebendoDados int,
+    errosEnviandoDados int
+);
+
+-- cadastrando funcinários
+insert into funcionario values
+	(null, "Wilson", "wilson@select.com", "wilson123", null),
+	(null, "Fernando", "fernando@select.com", "fernando123", 1000);
+
+-- cadastrando maquinas
+insert into maquina values (null), (null), (null), (null);
+
+-- criando o acesso do usuário às máquinas
+insert into funcionarioHasMaquina values (1001, 1), (1001, 2);
+
+-- cadastrando componentes
+insert into componente values
+	(null, "CPU-Load", "%", "ohm"),
+	(null, "CPU-Temperature", "° C", "ohm"),
+	(null, "CPU-Clocks", "%", "ohm"),
+    (null, "Memory-Load", "GB", "ohm"),
+    (null, "Disk", "GB", "psutil"),
+    (null, "Network-errin", "MB", "psutil"),
+    (null, "Network-errout", "MB", "psutil");
+
+-- criando a configuração das máquinas
+insert into configuracao values
+	(null, 1, 100, 80),
+	(null, 1, 101, 78),
+	(null, 1, 103, 12),
+	(null, 1, 104, 800),
+	(null, 1, 105, 100),
+	(null, 1, 106, 100),
+	(null, 2, 100, 75),
+	(null, 2, 102, 2000),
+	(null, 2, 103, 12),
+	(null, 3, 101, 80),
+	(null, 3, 105, 100),
+	(null, 4, 103, 12),
+	(null, 4, 104, 500);
+
+select * from dataset;
+
+select dadoPorNucleo.*, momentoLeitura, fkConfiguracao from dadoPorNucleo, dado, configuracao
+	where fkDado = idDado and fkConfiguracao = idConfiguracao and fkConfiguracao = 1002 and fkMaquina = 1 order by fkDado desc;
+    
